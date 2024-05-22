@@ -1,6 +1,20 @@
 <?php
 
+// config/activity-logger.php
+
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | Activity Logger Enabled
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether the activity logger is enabled or disabled.
+    | If set to true, activity logging will be enabled. If set to false, activity
+    | logging will be disabled and no logs will be recorded.
+    |
+    */
+    'enabled' => env('ACTIVITY_LOGGER_ENABLED', true),
+
     /*
     |--------------------------------------------------------------------------
     | Activity Log Table Name
@@ -39,4 +53,39 @@ return [
     |
     */
     'log_file_path' => storage_path('logs/activity_logs.log'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Log Only Changes
+    |--------------------------------------------------------------------------
+    |
+    | This value determines whether only the changes should be logged when an
+    | entity is updated.
+    |
+    */
+    'log_only_changes' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Log Login Auth
+    |--------------------------------------------------------------------------
+    |
+    | This option determines whether login events will be automatically logged.
+    | If set to true, login events will be logged. If set to false, login events
+    | will not be logged.
+    |
+    */
+    'log_login_auth' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Log Logout Auth
+    |--------------------------------------------------------------------------
+    |
+    | This option determines whether logout events will be automatically logged.
+    | If set to true, logout events will be logged. If set to false, logout events
+    | will not be logged.
+    |
+    */
+    'log_logout_auth' => true,
 ];

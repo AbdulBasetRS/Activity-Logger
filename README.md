@@ -43,9 +43,13 @@ You can configure the Activity Logger package by modifying the config/activity-l
 
 ```php
 return [
+        'enabled' => env('ACTIVITY_LOGGER_ENABLED', true),
         'table_name' => 'activity_logs',
         'log_method' => 'database', // Options: 'database', 'file'
         'log_file_path' => storage_path('logs/activity_logs.log'),
+        'log_only_changes' => true,
+        'log_login_auth' => true,
+        'log_logout_auth' => true
     ];
 ```
 
@@ -296,9 +300,15 @@ vendor/bin/phpunit tests/ActivityLoggerTest.php
 
 ## Features
 
-1. Log various activities such as entity creation, updates, deletions, and retrievals.
-2. Capture contextual information like user ID, IP address, device type, etc.
-3. Flexibility to choose between logging methods: database or file.
+- **Comprehensive Activity Logging**: Track various user actions such as create, update, delete, and etc.. operations on models.
+- **Flexible Configuration**: Customize logging behavior with configuration options such as log method (database or file), log file path.
+- **Automatic Login and Logout Tracking**: Automatically log user login and logout events with configurable options.
+- **Event-Specific Data Logging**: Log event-specific data such as changes made during updates, old and new values, IP address, browser details, and more.
+- **Support for Laravel**: Use the package seamlessly with Laravel applications.
+- **Trait and Observer Support**: Easily integrate activity logging into your models using provided traits or observers.
+- **Easy to Use**: Simple API for logging activities, making it straightforward to implement in your application.
+- **Custom Event Logging**: Extend the functionality by adding custom event listeners to log additional events specific to your application.
+- **Configurable**: Configure the package to suit your application's requirements, including enabling or disabling specific logging features.
 
 ## Author
 

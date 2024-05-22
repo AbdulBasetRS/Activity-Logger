@@ -12,9 +12,21 @@ class ActivityLogger
 {
     public static function log($model, $event = null, $description = null, $otherInfo = [])
     {
+        if (!config('activity-logger.enabled')) {
+            return; // Activity logging is disabled
+        }
+
         if ($event == 'updated') {
-            $old = json_encode($model->getOriginal());
-            $new = json_encode($model->getChanges());
+            $originalData = $model->getOriginal();
+            $changedData = $model->getChanges();
+            if (config('activity-logger.log_only_changes')) {
+                $changedFields = array_intersect_key($originalData, $changedData);
+                $old = json_encode($changedFields);
+                $new = json_encode($changedData);
+            } else {
+                $old = json_encode($originalData);
+                $new = json_encode($model->toArray());
+            }
         } elseif ($event == 'created') {
             $new = json_encode($model->toArray());
             $old = null; // No old data for created event
@@ -71,6 +83,10 @@ class ActivityLogger
 
     public static function retrieved($model, $description = null, $otherInfo = [])
     {
+        if (!config('activity-logger.enabled')) {
+            return; // Activity logging is disabled
+        }
+
         if (!is_array($otherInfo)) {
             $otherInfo = null;
         } elseif (empty($otherInfo)) {
@@ -112,6 +128,10 @@ class ActivityLogger
 
     public static function visited($description = null, $otherInfo = [])
     {
+        if (!config('activity-logger.enabled')) {
+            return; // Activity logging is disabled
+        }
+
         if (!is_array($otherInfo)) {
             $otherInfo = null;
         } elseif (empty($otherInfo)) {
@@ -154,6 +174,10 @@ class ActivityLogger
 
     public static function event($event = 'default', $description = null, $otherInfo = [])
     {
+        if (!config('activity-logger.enabled')) {
+            return; // Activity logging is disabled
+        }
+        
         if (!is_array($otherInfo)) {
             $otherInfo = null;
         } elseif (empty($otherInfo)) {

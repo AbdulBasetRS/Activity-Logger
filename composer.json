@@ -48,7 +48,12 @@
         "package",
         "activities",
         "activity",
-        "logger"
+        "logger",
+        "activity logger",
+        "logging",
+        "events",
+        "tracking",
+        "audit trail"
     ],
     "minimum-stability": "dev"
 }
