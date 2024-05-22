@@ -3,7 +3,7 @@
     "description": "A comprehensive activity logger for Laravel projects.",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "authors": [
         {
             "name": "Abdulbaset R. Sayed",
@@ -38,9 +38,16 @@
             }
         }
     },
+  
     "require-dev": {
         "phpunit/phpunit": "^9.5"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    "keywords": [
+        "php",
+        "laravel",
+        "package",
+        "activities",
+        "activity",
+        "logger"
+    ]
 }
