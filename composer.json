@@ -49,5 +49,6 @@
         "activities",
         "activity",
         "logger"
-    ]
+    ],
+    "prefer-stable": true
 }
