@@ -4,9 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateActivityLogsTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create(config('activity-logger.table_name'), function (Blueprint $table) {
             $table->id();
@@ -33,4 +33,4 @@ class CreateActivityLogsTable extends Migration
     {
         Schema::dropIfExists(config('activity-logger.table_name'));
     }
-}
+};

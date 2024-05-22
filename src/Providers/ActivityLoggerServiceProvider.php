@@ -3,6 +3,7 @@
 namespace Abdulbaset\ActivityLogger\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Abdulbaset\ActivityLogger\ActivityLogger;
 
 class ActivityLoggerServiceProvider extends ServiceProvider
 {
@@ -22,5 +23,8 @@ class ActivityLoggerServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/../Config/activity-logger.php', 'activity-logger'
         );
+        $this->app->singleton('activity-logger', function ($app) {
+            return new ActivityLogger();
+        });
     }
 }

@@ -66,9 +66,12 @@ There are multiple ways to integrate the Activity Logger package into your Larav
 To log events directly in your application code, you can use the `ActivityLogger` facade provided by the package. Here's an example of how to log an event:
 
 ```php
-    use Abdulbaset\ActivityLogger\Facades\ActivityLogger;
+  use Abdulbaset\ActivityLogger\Facades\ActivityLogger;
 
-    ActivityLogger::log(Model::class, 'retrieved', 'Entity retrieved', ['user_id' => auth()->id()]);
+  ActivityLogger::event(string $event ,string $description ,array $otherInfo);
+  ActivityLogger::retrieved(Model::class $model ,string $description ,array $otherInfo);
+  ActivityLogger::visited(string $description ,array $otherInfo);
+  ActivityLogger::log(Model::class $model, string $event ,string $description ,array $otherInfo);
 ```
 
 In this example, Model::class represents the entity being logged, 'retrieved' is the event type, 'Entity retrieved' is the event description, and ['example_key' => 'example value'] is additional information associated with the event.
@@ -115,7 +118,173 @@ class AppServiceProvider extends ServiceProvider
 
 ## Examples
 
-For usage examples and code snippets, please refer to the [Usage](#usage) section above.
+For usage examples and code snippets.
+
+- if you need use in **Controller** following example.
+
+```php
+namespace App\Http\Controllers\Blog;
+
+use App\Http\Controllers\Controller;
+use Abdulbaset\ActivityLogger\Facades\ActivityLogger;
+use App\Models\Blog;
+
+class BlogController extends Controller
+{
+    public function index()
+    {
+      $blogs = Blog::all();
+      // set visited event for who visited the blogs page
+      ActivityLogger::visited($description = 'Auth visited the blogs page', $otherInfo = ['local' => app()->getLocale()]);
+      return view('blog.index');
+    }
+
+    public function show(string $id)
+    {
+      $blog = Blog::find($id);
+      // set retrieved event for who gets the blog
+      ActivityLogger::retrieved($model = $blog, $description = 'Auth show blog', $otherInfo = ['local' => app()->getLocale()]);
+      return view('blog.show');
+    }
+
+    public function store(Request $request)
+    {
+      $blog = Blog::create([
+        'title' => 'Test Blog Title',
+        'slug' => 'test-blog-slug',
+      ]);
+      // set log event when you dont use the trait in blog model or observer at app provider
+      ActivityLogger::log($model = $blog,$event = 'created' ,$description = 'blog created successfully');
+      return view('blog.store');
+    }
+
+    public function update(Request $request,string $id)
+    {
+      $blog = Blog::findOrFail($id);
+      $blog->update([
+          'title' => 'Test Blog Title Update',
+      ]);
+      // set log event when you dont use the trait in blog model or observer at app provider
+      ActivityLogger::log($model = $blog ,$event = 'updated' ,$description =  'blog updated successfully');
+      return view('blog.update');
+    }
+
+    public function destroy(string $id)
+    {
+      $blog = Blog::findOrFail($id);
+      // set log event when you dont use the trait in blog model or observer at app provider
+      ActivityLogger::log($model = $blog ,$event = 'deleted' ,$description =  'blog deleted successfully');
+      $blog->delete();
+      return view('blog.destroy');
+    }
+
+    public function export(string $id)
+    {
+      // your logic here
+      ActivityLogger::event($event = 'export-excel' ,$description = 'export blogs for excel file' , ['key' => 'value']);
+      return view('blog.destroy');
+    }
+
+    // etc..
+}
+```
+
+- if you need use by **Trait** inside model following example.
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Abdulbaset\ActivityLogger\Traits\ActivityLoggerTrait;
+
+class Blog extends Model
+{
+    use HasFactory;
+    // tracking activity log for created, updated and deleted
+    use ActivityLoggerTrait;
+
+    protected $table = 'blogs';
+
+    protected $fillable = [
+        'title',
+        'slug',
+        // etc..
+    ];
+}
+```
+
+- if you need use by **Observer** following example.
+
+```php
+namespace App\Providers;
+
+use Abdulbaset\ActivityLogger\Observers\ActivityLoggerObserver;
+use App\Models\Blog;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+      // tracking activity log for created, updated and deleted
+        Blog::observe(ActivityLoggerObserver::class);
+    }
+}
+```
+
+- if you want make customized **Observer** following example.
+
+```php
+namespace App\Observers;
+
+use App\Models\Blog;
+use Abdulbaset\ActivityLogger\Facades\ActivityLogger;
+
+class BlogObserver
+{
+    public function created(Blog $blog)
+    {
+        ActivityLogger::log($blog, 'created', 'Blog created');
+    }
+
+    public function updated(Blog $blog)
+    {
+        ActivityLogger::log($blog, 'updated', 'Blog updated');
+    }
+
+    public function deleted(Blog $blog)
+    {
+        ActivityLogger::log($blog, 'deleted', 'Blog deleted');
+    }
+
+    // etc..
+}
+```
+
+and assign inside boot method at AppServiceProvider namespace
+
+```php
+namespace App\Providers;
+
+use App\Observers\BlogObserver;
+use App\Models\Blog;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        Blog::observe(BlogObserver::class);
+    }
+}
+```
 
 ## Testing
 
