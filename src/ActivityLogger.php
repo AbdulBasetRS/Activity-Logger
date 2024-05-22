@@ -203,6 +203,7 @@ class ActivityLogger
     {
         $logFilePath = config('activity-logger.log_file_path');
         $logEntry = json_encode($logData) . PHP_EOL;
-        Storage::append($logFilePath, $logEntry);
+        // Append the log entry to the file
+        file_put_contents($logFilePath, $logEntry, FILE_APPEND);
     }
 }
