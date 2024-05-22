@@ -3,7 +3,7 @@
     "description": "A comprehensive activity logger for Laravel projects.",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "authors": [
         {
             "name": "Abdulbaset R. Sayed",
@@ -50,5 +50,5 @@
         "activity",
         "logger"
     ],
-    "prefer-stable": true
+    "minimum-stability": "dev"
 }
