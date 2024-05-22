@@ -1,0 +1,46 @@
+{
+    "name": "abdulbaset/activity-logger",
+    "description": "A comprehensive activity logger for Laravel projects.",
+    "type": "library",
+    "license": "MIT",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Abdulbaset R. Sayed",
+            "email": "AbdulbasetRedaSayedHF@Gmail.com"
+        }
+    ],
+    "homepage": "https://digitalatum.com",
+    "require": {
+        "php": "^7.4|^8.0",
+        "illuminate/support": "^8.0|^9.0|^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Abdulbaset\\ActivityLogger\\": "src/"
+        },
+        "files": [
+            "src/Helpers/ActivityLoggerHelper.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Abdulbaset\\ActivityLogger\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Abdulbaset\\ActivityLogger\\Providers\\ActivityLoggerServiceProvider"
+            ],
+            "aliases": {
+                "ActivityLogger": "Abdulbaset\\ActivityLogger\\Facades\\ActivityLogger"
+            }
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
