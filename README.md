@@ -15,7 +15,6 @@ Activity Logger is a comprehensive logging package for Laravel projects, designe
     - [Using Traits](#using-traits)
     - [Using Observers](#using-observers)
   - [Examples](#examples)
-  - [Testing](#testing)
   - [Features](#features)
   - [Author](#author)
   - [Contributing](#contributing)
@@ -57,8 +56,22 @@ return [
 
 After installing the package, you need to run the migrations to create the required database tables. To do this, use the following Artisan command:
 
+1. Running Migrations for Specific Tables
+
 ```bash
 php artisan migrate --path=vendor/abdulbaset/activity-logger/src/Migrations
+```
+
+2. Rolling Back Specific Migrations
+
+```bash
+php artisan migrate:rollback --path=vendor/abdulbaset/activity-logger/src/Migrations
+```
+
+3. Refreshing Migrations for Specific Tables
+
+```bash
+php artisan migrate:refresh --path=vendor/abdulbaset/activity-logger/src/Migrations
 ```
 
 ## Usage
@@ -288,14 +301,6 @@ class AppServiceProvider extends ServiceProvider
         Blog::observe(BlogObserver::class);
     }
 }
-```
-
-## Testing
-
-To run the tests for the Activity Logger package, you can use PHPUnit. Execute the following command in your terminal:
-
-```bash
-vendor/bin/phpunit tests/ActivityLoggerTest.php
 ```
 
 ## Features
