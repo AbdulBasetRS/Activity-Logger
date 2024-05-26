@@ -4,7 +4,7 @@ namespace Abdulbaset\ActivityLogger\Helpers;
 
 if (!function_exists('getBrowserVersion')) {
     function getBrowserVersion($user_agent) {
-        $pattern = '/(?P<browser>Firefox|Chrome|Safari|Opera|MSIE|Trident[^;]+).*?((?P<version>\d+[\w\.]*).*)?$/i';
+        $pattern = '/(?P<browser>Edge|Firefox|Chrome|Safari|Opera|MSIE|Trident).*?((?P<version>\d+[\w\.]*).*)?$/i';
         if (preg_match($pattern, $user_agent, $matches)) {
             return isset($matches['version']) ? $matches['version'] : null;
         }
@@ -13,62 +13,132 @@ if (!function_exists('getBrowserVersion')) {
 }
 
 if (!function_exists('getDeviceType')) {
-    function getDeviceType($userAgent)
-    {
-        if (preg_match('/tablet|ipad|playbook|silk/i', $userAgent)) {
-            return 'Tablet';
-        } elseif (preg_match('/mobile|android|phone|iphone|ipod|blackberry|iemobile|opera mini/i', $userAgent)) {
-            return 'Mobile';
-        } else {
-            return 'Desktop';
+    function getDeviceType($userAgent) {
+        $device_types = array(
+            '/tablet|ipad|playbook|silk/i'          => 'Tablet',
+            '/mobile|android|phone|iphone|ipod|blackberry|iemobile|opera mini/i' => 'Mobile',
+            '/tv|smart-tv|googletv|appletv|hbbtv|netcast.tv|viera|aquos|bravia|playstation|xbox|roku/i' => 'Smart TV',
+            '/game|nintendo|wii|xbox/i'             => 'Game Console',
+            '/bot|crawl|spider|slurp|google|baidu|bing|msn|duckduckgo|teoma|cumulus|travis|feedburner|rss/i' => 'Bot/Crawler',
+            '/.*/i'                                 => 'Desktop'
+        );
+    
+        foreach ($device_types as $regex => $device_type) {
+            if (preg_match($regex, $userAgent)) {
+                return $device_type;
+            }
         }
+    
+        return 'Unknown';
     }
 }
 
 if (!function_exists('getOperatingSystem')) {
-    function getOperatingSystem($userAgent)
+    function getOperatingSystem($user_agent)
     {
-        if (preg_match('/windows nt 10/i', $userAgent)) {
-            return 'Windows 10';
-        } elseif (preg_match('/windows nt 6.3/i', $userAgent)) {
-            return 'Windows 8.1';
-        } elseif (preg_match('/windows nt 6.2/i', $userAgent)) {
-            return 'Windows 8';
-        } elseif (preg_match('/windows nt 6.1/i', $userAgent)) {
-            return 'Windows 7';
-        } elseif (preg_match('/windows nt 6.0/i', $userAgent)) {
-            return 'Windows Vista';
-        } elseif (preg_match('/windows nt 5.1/i', $userAgent)) {
-            return 'Windows XP';
-        } elseif (preg_match('/macintosh|mac os x/i', $userAgent)) {
-            return 'Mac OS X';
-        } elseif (preg_match('/linux/i', $userAgent)) {
-            return 'Linux';
-        } elseif (preg_match('/iphone|ipad|ipod/i', $userAgent)) {
-            return 'iOS';
-        } elseif (preg_match('/android/i', $userAgent)) {
-            return 'Android';
-        } else {
-            return 'Unknown';
+        $os_array = array(
+            '/windows nt 10.0/i'    => 'Windows 10',
+            '/windows nt 6.3/i'     => 'Windows 8.1',
+            '/windows nt 6.2/i'     => 'Windows 8',
+            '/windows nt 6.1/i'     => 'Windows 7',
+            '/windows nt 6.0/i'     => 'Windows Vista',
+            '/windows nt 5.2/i'     => 'Windows Server 2003/XP x64',
+            '/windows nt 5.1/i'     => 'Windows XP',
+            '/windows xp/i'         => 'Windows XP',
+            '/windows nt 5.0/i'     => 'Windows 2000',
+            '/windows me/i'         => 'Windows ME',
+            '/win98/i'              => 'Windows 98',
+            '/win95/i'              => 'Windows 95',
+            '/win16/i'              => 'Windows 3.11',
+            '/windows server 2019/i' => 'Windows Server 2019',
+            '/windows server 2016/i' => 'Windows Server 2016',
+            '/windows server 2012 r2/i' => 'Windows Server 2012 R2',
+            '/windows server 2012/i' => 'Windows Server 2012',
+            '/windows server 2008 r2/i' => 'Windows Server 2008 R2',
+            '/windows server 2008/i' => 'Windows Server 2008',
+            '/windows server 2003/i' => 'Windows Server 2003',
+            '/macintosh|mac os x/i' => 'Mac OS X',
+            '/mac_powerpc/i'        => 'Mac OS 9',
+            '/linux/i'              => 'Linux',
+            '/ubuntu/i'             => 'Ubuntu',
+            '/debian/i'             => 'Debian',
+            '/fedora/i'             => 'Fedora',
+            '/red hat|redhat/i'     => 'Red Hat',
+            '/centos/i'             => 'CentOS',
+            '/mandriva/i'           => 'Mandriva',
+            '/mageia/i'             => 'Mageia',
+            '/gentoo/i'             => 'Gentoo',
+            '/slackware/i'          => 'Slackware',
+            '/suse/i'               => 'SUSE',
+            '/openSUSE/i'           => 'openSUSE',
+            '/iphone/i'             => 'iPhone OS',
+            '/ipod/i'               => 'iPod OS',
+            '/ipad/i'               => 'iPad OS',
+            '/android/i'            => 'Android',
+            '/blackberry/i'         => 'BlackBerry',
+            '/webos/i'              => 'WebOS',
+            '/symbian/i'            => 'Symbian',
+            '/bada/i'               => 'Bada',
+            '/tizen/i'              => 'Tizen',
+            '/sailfish/i'           => 'Sailfish OS',
+            '/kindle/i'             => 'Kindle OS',
+            '/playbook/i'           => 'BlackBerry Tablet OS',
+            '/nokia/i'              => 'Nokia OS',
+            '/series60/i'           => 'Symbian Series 60',
+            '/series40/i'           => 'Symbian Series 40',
+            '/rim tablet os/i'      => 'BlackBerry Tablet OS',
+            '/meego/i'              => 'MeeGo',
+            '/palm/i'               => 'Palm OS',
+            '/hpwos/i'              => 'HP WebOS',
+            '/x11/i'                => 'Unix',
+            '/minix/i'              => 'Minix',
+            '/beos/i'               => 'BeOS',
+            '/os\/2/i'              => 'OS/2',
+            '/chromeos/i'           => 'ChromeOS',
+            '/cros/i'               => 'ChromeOS',
+            '/nintendo wii/i'       => 'Nintendo Wii',
+            '/playstation/i'        => 'PlayStation',
+            '/xbox/i'               => 'Xbox',
+            '/mobile/i'             => 'Mobile Device'
+        );
+    
+        foreach ($os_array as $regex => $value) {
+            if (preg_match($regex, $user_agent)) {
+                return $value;
+            }
         }
+    
+        return 'Unknown';
     }
 }
 
 if (!function_exists('getBrowser')) {
     function getBrowser($user_agent) {
-        if (preg_match('/msie|trident/i', $user_agent) && !preg_match('/opera/i', $user_agent)) {
-            return 'Internet Explorer';
-        } elseif (preg_match('/edg/i', $user_agent)) {
-            return 'Microsoft Edge';
-        } elseif (preg_match('/firefox/i', $user_agent)) {
-            return 'Firefox';
-        } elseif (preg_match('/chrome/i', $user_agent)) {
-            return 'Chrome';
-        } elseif (preg_match('/safari/i', $user_agent)) {
-            return 'Safari';
-        } elseif (preg_match('/opera/i', $user_agent)) {
-            return 'Opera';
+        $browsers = array(
+            '/rv:11/i'                      => 'Internet Explorer 11',
+            '/msie/i'                       => 'Internet Explorer',
+            '/edg/i'                        => 'Edge',
+            '/chrome/i'                     => 'Chrome',
+            '/firefox/i'                    => 'Firefox',
+            '/safari/i'                     => 'Safari',
+            '/opera/i'                      => 'Opera',
+            '/googlebot/i'                  => 'Googlebot',
+            '/bingbot/i'                    => 'Bingbot',
+            '/facebookexternalhit/i'        => 'Facebook',
+            '/twitterbot/i'                 => 'Twitter Bot',
+            '/baiduspider/i'                => 'Baiduspider',
+            '/yandexbot/i'                  => 'Yandex Bot',
+            '/duckduckbot/i'                => 'DuckDuckGo Bot',
+            '/ia_archiver/i'                => 'Alexa Crawler',
+            '/.*/i'                         => 'Unknown'
+        );
+    
+        foreach ($browsers as $regex => $browser) {
+            if (preg_match($regex, $user_agent)) {
+                return $browser;
+            }
         }
-        return null;
+    
+        return 'Unknown';
     }
 }
