@@ -4,7 +4,6 @@ namespace Abdulbaset\ActivityLogger;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Abdulbaset\ActivityLogger\Helpers;
 
@@ -16,69 +15,9 @@ class ActivityLogger
             return; // Activity logging is disabled
         }
 
-        if ($event == 'updated') {
-            $originalData = $model->getOriginal();
-            $changedData = $model->getChanges();
-            if (config('activity-logger.log_only_changes')) {
-                $changedFields = array_intersect_key($originalData, $changedData);
-                $old = json_encode($changedFields);
-                $new = json_encode($changedData);
-            } else {
-                $old = json_encode($originalData);
-                $new = json_encode($model->toArray());
-            }
-        } elseif ($event == 'created') {
-            $new = json_encode($model->toArray());
-            $old = null; // No old data for created event
-        } elseif ($event == 'deleted') {
-            $old = json_encode($model->toArray());
-            $new = null; // No new data for deleted event
-        } elseif ($event == 'retrieved') {
-            $old = json_encode($model->toArray());
-            $new = null; // No new data for retrieved event
-        } else {
-            $old = null;
-            $new = null;
-        }
+        $logData = self::prepareLogData($model, $event, $description, $otherInfo);
 
-        if (!is_array($otherInfo)) {
-            $otherInfo = null;
-        } elseif (empty($otherInfo)) {
-            $otherInfo = null;
-        } else {
-            $otherInfo = json_encode($otherInfo);
-        }
-
-        $logData = [
-            'event' => $event,
-            'user_id' => Auth::id() ?: null,
-            'model' => get_class($model),
-            'model_id' => $model->id,
-            'old' => $old,
-            'new' => $new,
-            'ip' => Request::ip(),
-            'browser' => Request::header('User-Agent'),
-            'browser_version' => Helpers\getBrowserVersion(Request::header('User-Agent')),
-            'referring_url' => Request::server('HTTP_REFERER'),
-            'current_url' => Request::fullUrl(),
-            'device_type' => Helpers\getDeviceType(),
-            'operating_system' => Helpers\getOperatingSystem(),
-            'description' => $description,
-            'other_info' => $otherInfo,
-            'created_at' => now()->toDateTimeString(), // Use Laravel's now() helper for the timestamp
-            'updated_at' => now()->toDateTimeString(),
-        ];
-
-        // Log based on the configured method
-        switch (config('activity-logger.log_method')) {
-            case 'file':
-                self::logToFile($logData);
-                break;
-            case 'database':
-            default:
-                self::logToDatabase($logData);
-                break;
-        }
+        self::logData($logData);
     }
 
     public static function retrieved($model, $description = null, $otherInfo = [])
@@ -87,43 +26,9 @@ class ActivityLogger
             return; // Activity logging is disabled
         }
 
-        if (!is_array($otherInfo)) {
-            $otherInfo = null;
-        } elseif (empty($otherInfo)) {
-            $otherInfo = null;
-        } else {
-            $otherInfo = json_encode($otherInfo);
-        }
+        $logData = self::prepareLogData($model, 'retrieved', $description, $otherInfo);
 
-        $logData = [
-            'event' => 'retrieved',
-            'user_id' => Auth::id() ?: null,
-            'model' => get_class($model),
-            'model_id' => $model->id,
-            'old' =>  $model->toJson(),
-            'ip' => Request::ip(),
-            'browser' => Request::header('User-Agent'),
-            'browser_version' => Helpers\getBrowserVersion(Request::header('User-Agent')),
-            'referring_url' => Request::server('HTTP_REFERER'),
-            'current_url' => Request::fullUrl(),
-            'device_type' => Helpers\getDeviceType(),
-            'operating_system' => Helpers\getOperatingSystem(),
-            'description' => $description,
-            'other_info' => $otherInfo,
-            'created_at' => now()->toDateTimeString(), // Use Laravel's now() helper for the timestamp
-            'updated_at' => now()->toDateTimeString(),
-        ];
-
-        // Log based on the configured method
-        switch (config('activity-logger.log_method')) {
-            case 'file':
-                self::logToFile($logData);
-                break;
-            case 'database':
-            default:
-                self::logToDatabase($logData);
-                break;
-        }
+        self::logData($logData);
     }
 
     public static function visited($description = null, $otherInfo = [])
@@ -132,44 +37,9 @@ class ActivityLogger
             return; // Activity logging is disabled
         }
 
-        if (!is_array($otherInfo)) {
-            $otherInfo = null;
-        } elseif (empty($otherInfo)) {
-            $otherInfo = null;
-        } else {
-            $otherInfo = json_encode($otherInfo);
-        }
+        $logData = self::prepareLogData(null, 'visited', $description, $otherInfo);
 
-        $logData = [
-            'event' => 'visited',
-            'user_id' => Auth::id() ?: null,
-            'model' => null, // No specific model
-            'model_id' => null, // No specific model ID
-            'old' => null,
-            'new' => null,
-            'ip' => Request::ip(),
-            'browser' => Request::header('User-Agent'),
-            'browser_version' => Helpers\getBrowserVersion(Request::header('User-Agent')),
-            'referring_url' => Request::server('HTTP_REFERER'),
-            'current_url' => Request::fullUrl(),
-            'device_type' => Helpers\getDeviceType(),
-            'operating_system' => Helpers\getOperatingSystem(),
-            'description' => $description,
-            'other_info' => $otherInfo,
-            'created_at' => now()->toDateTimeString(), // Use Laravel's now() helper for the timestamp
-            'updated_at' => now()->toDateTimeString(),
-        ];
-
-        // Log based on the configured method
-        switch (config('activity-logger.log_method')) {
-            case 'file':
-                self::logToFile($logData);
-                break;
-            case 'database':
-            default:
-                self::logToDatabase($logData);
-                break;
-        }
+        self::logData($logData);
     }
 
     public static function event($event = 'default', $description = null, $otherInfo = [])
@@ -177,36 +47,59 @@ class ActivityLogger
         if (!config('activity-logger.enabled')) {
             return; // Activity logging is disabled
         }
-        
-        if (!is_array($otherInfo)) {
-            $otherInfo = null;
-        } elseif (empty($otherInfo)) {
-            $otherInfo = null;
-        } else {
-            $otherInfo = json_encode($otherInfo);
-        }
+
+        $logData = self::prepareLogData(null, $event, $description, $otherInfo);
+
+        self::logData($logData);
+    }
+
+    protected static function prepareLogData($model, $event, $description, $otherInfo)
+    {
+        $userAgent = Request::header('User-Agent');
 
         $logData = [
             'event' => $event,
             'user_id' => Auth::id() ?: null,
-            'model' => null, // No specific model
-            'model_id' => null, // No specific model ID
+            'model' => $model ? get_class($model) : null,
+            'model_id' => $model ? $model->id : null,
             'old' => null,
             'new' => null,
             'ip' => Request::ip(),
-            'browser' => Request::header('User-Agent'),
-            'browser_version' => Helpers\getBrowserVersion(Request::header('User-Agent')),
+            'browser' => Helpers\getBrowser($userAgent),
+            'browser_version' => Helpers\getBrowserVersion($userAgent),
             'referring_url' => Request::server('HTTP_REFERER'),
             'current_url' => Request::fullUrl(),
-            'device_type' => Helpers\getDeviceType(),
-            'operating_system' => Helpers\getOperatingSystem(),
+            'device_type' => Helpers\getDeviceType($userAgent),
+            'operating_system' => Helpers\getOperatingSystem($userAgent),
             'description' => $description,
-            'other_info' => $otherInfo,
-            'created_at' => now()->toDateTimeString(), // Use Laravel's now() helper for the timestamp
+            'other_info' => empty($otherInfo) ? null : json_encode($otherInfo),
+            'created_at' => now()->toDateTimeString(),
             'updated_at' => now()->toDateTimeString(),
         ];
 
-        // Log based on the configured method
+        if ($event === 'updated') {
+            $logData['old'] = json_encode($model->getOriginal());
+            $logData['new'] = json_encode($model->getChanges());
+            if (config('activity-logger.log_only_changes')) {
+                $logData['old'] = json_encode(array_intersect_key($model->getOriginal(), $model->getChanges()));
+                $logData['new'] = json_encode($model->getChanges());
+            } else {
+                $logData['old'] = json_encode($model->getOriginal());
+                $logData['new'] = json_encode($model->toArray());
+            }
+        } elseif ($event === 'created') {
+            $logData['new'] = json_encode($model->toArray());
+        } elseif ($event === 'deleted') {
+            $logData['old'] = json_encode($model->toArray());
+        } elseif ($event === 'retrieved') {
+            $logData['old'] = json_encode($model->toArray());
+        }
+
+        return $logData;
+    }
+
+    protected static function logData($logData)
+    {
         switch (config('activity-logger.log_method')) {
             case 'file':
                 self::logToFile($logData);

@@ -3,40 +3,18 @@
 namespace Abdulbaset\ActivityLogger\Helpers;
 
 if (!function_exists('getBrowserVersion')) {
-    function getBrowserVersion($userAgent)
-    {
-        if (preg_match('/(firefox|msie|trident|chrome|safari|opr|edg|opera)[\/\s](\d+)/i', $userAgent, $matches)) {
-            $browser = $matches[1];
-            $version = $matches[2];
-
-            // Normalize browser names
-            switch (strtolower($browser)) {
-                case 'msie':
-                case 'trident':
-                    return 'Internet Explorer ' . $version;
-                case 'edg':
-                    return 'Edge ' . $version;
-                case 'opr':
-                    return 'Opera ' . $version;
-                case 'chrome':
-                    return 'Chrome ' . $version;
-                case 'firefox':
-                    return 'Firefox ' . $version;
-                case 'safari':
-                    return 'Safari ' . $version;
-                default:
-                    return $browser . ' ' . $version;
-            }
+    function getBrowserVersion($user_agent) {
+        $pattern = '/(?P<browser>Firefox|Chrome|Safari|Opera|MSIE|Trident[^;]+).*?((?P<version>\d+[\w\.]*).*)?$/i';
+        if (preg_match($pattern, $user_agent, $matches)) {
+            return isset($matches['version']) ? $matches['version'] : null;
         }
-        return 'Unknown';
+        return null;
     }
 }
 
 if (!function_exists('getDeviceType')) {
-    function getDeviceType()
+    function getDeviceType($userAgent)
     {
-        $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']);
-
         if (preg_match('/tablet|ipad|playbook|silk/i', $userAgent)) {
             return 'Tablet';
         } elseif (preg_match('/mobile|android|phone|iphone|ipod|blackberry|iemobile|opera mini/i', $userAgent)) {
@@ -48,10 +26,8 @@ if (!function_exists('getDeviceType')) {
 }
 
 if (!function_exists('getOperatingSystem')) {
-    function getOperatingSystem()
+    function getOperatingSystem($userAgent)
     {
-        $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']);
-
         if (preg_match('/windows nt 10/i', $userAgent)) {
             return 'Windows 10';
         } elseif (preg_match('/windows nt 6.3/i', $userAgent)) {
@@ -75,5 +51,24 @@ if (!function_exists('getOperatingSystem')) {
         } else {
             return 'Unknown';
         }
+    }
+}
+
+if (!function_exists('getBrowser')) {
+    function getBrowser($user_agent) {
+        if (preg_match('/msie|trident/i', $user_agent) && !preg_match('/opera/i', $user_agent)) {
+            return 'Internet Explorer';
+        } elseif (preg_match('/edg/i', $user_agent)) {
+            return 'Microsoft Edge';
+        } elseif (preg_match('/firefox/i', $user_agent)) {
+            return 'Firefox';
+        } elseif (preg_match('/chrome/i', $user_agent)) {
+            return 'Chrome';
+        } elseif (preg_match('/safari/i', $user_agent)) {
+            return 'Safari';
+        } elseif (preg_match('/opera/i', $user_agent)) {
+            return 'Opera';
+        }
+        return null;
     }
 }
