@@ -30,6 +30,14 @@ You can install the Activity Logger package via Composer. Run the following comm
 composer require abdulbaset/activity-logger
 ```
 
+To update the Activity Logger package in your Laravel project, you can use Composer's update command. Here's how you can do it:
+
+```bash
+composer update abdulbaset/activity-logger
+```
+
+After running the update command in your Laravel project directory, and Composer will check for updates to the abdulbaset/activity-logger package and its dependencies. If a newer version is available, Composer will download and install it, updating your project.
+
 ### Configuration
 
 After installing the package, publish the configuration file using the following command:
