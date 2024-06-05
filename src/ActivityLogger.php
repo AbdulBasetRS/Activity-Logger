@@ -52,10 +52,19 @@ class ActivityLogger
 
         self::logData($logData);
     }
-
+    // $table->text('user_agent')->nullable();
+    // $table->string('accept_language')->nullable();
+    // $table->json('query_parameters')->nullable();
+    // $table->string('request_method')->nullable();
     protected static function prepareLogData($model, $event, $description, $otherInfo)
     {
-        $userAgent = Request::header('User-Agent');
+        $userAgent = Request::header('User-Agent') ?? null;
+        $acceptLanguage = Request::header('Accept-Language') ?? null;
+        $queryParameters = Request::query() ?? null;
+        $requestMethod = Request::method() ?? null;
+
+        // Get all headers
+        $headers = Request::header();
 
         $logData = [
             'event' => $event,
@@ -65,6 +74,13 @@ class ActivityLogger
             'old' => null,
             'new' => null,
             'ip' => Request::ip(),
+            
+            'user_agent' => $userAgent,
+            'accept_language' => $acceptLanguage,
+            'query_parameters' => !empty($queryParameters) ? json_encode($queryParameters) : null,
+            'request_method' => $requestMethod,
+            'headers' => !empty($headers) ? json_encode($headers) : null,
+
             'browser' => Helpers\getBrowser($userAgent),
             'browser_version' => Helpers\getBrowserVersion($userAgent),
             'referring_url' => Request::server('HTTP_REFERER'),
