@@ -10,8 +10,7 @@ return new class extends Migration
     {
         Schema::table(config('activity-logger.table_name'), function (Blueprint $table) {
             $table->text('user_agent')->nullable()->after('ip');
-            $table->string('accept_language')->nullable()->after('user_agent');
-            $table->json('query_parameters')->nullable()->after('accept_language');
+            $table->json('query_parameters')->nullable()->after('user_agent');
             $table->string('request_method')->nullable()->after('query_parameters');
             $table->json('headers')->nullable()->after('request_method');
         });
@@ -21,7 +20,6 @@ return new class extends Migration
     {
         Schema::table(config('activity-logger.table_name'), function (Blueprint $table) {
             $table->dropColumn('user_agent');
-            $table->dropColumn('accept_language');
             $table->dropColumn('query_parameters');
             $table->dropColumn('request_method');
             $table->dropColumn('headers');

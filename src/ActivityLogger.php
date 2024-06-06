@@ -59,7 +59,6 @@ class ActivityLogger
     protected static function prepareLogData($model, $event, $description, $otherInfo)
     {
         $userAgent = Request::header('User-Agent') ?? null;
-        $acceptLanguage = Request::header('Accept-Language') ?? null;
         $queryParameters = Request::query() ?? null;
         $requestMethod = Request::method() ?? null;
 
@@ -76,7 +75,6 @@ class ActivityLogger
             'ip' => Request::ip(),
             
             'user_agent' => $userAgent,
-            'accept_language' => $acceptLanguage,
             'query_parameters' => !empty($queryParameters) ? json_encode($queryParameters) : null,
             'request_method' => $requestMethod,
             'headers' => !empty($headers) ? json_encode($headers) : null,
